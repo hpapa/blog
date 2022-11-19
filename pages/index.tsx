@@ -12,7 +12,6 @@ const ButtonContainer = styled.div`
   margin: 50px;
 `;
 
-
 export default function Home() {
   const router = useRouter();
 
@@ -33,7 +32,7 @@ export default function Home() {
           Hpapa blog
         </h1>
         <ButtonContainer>
-          <Button text="Enter" onClick={() => handleRoutePush("/test")} style={{ width: 200 }} />
+          <Button text="Enter" onClick={() => handleRoutePush("/regex-generator")} style={{ width: 200 }} />
         </ButtonContainer>
       </main>
 
