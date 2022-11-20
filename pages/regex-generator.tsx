@@ -4,7 +4,9 @@ import Header from "../components/Common/Header"
 import Title from "../components/Common/Title";
 import Input from "../components/Common/Input";
 import Button from "../components/Common/Button";
+import CheckBoxList from "../components/Common/CheckBoxList";
 import useInput from "../hooks/useInput";
+import useCheckBoxList from "../hooks/useCheckBoxList";
 import Highlighter from "react-highlight-words";
 import styled from "styled-components";
 
@@ -31,6 +33,11 @@ const AddButtonContainer = styled.div`
   justify-content: center;
 `;
 
+const checkList = [
+  { label: "数字", name: "integer", checked: false },
+  { label: "英語", name: "english", checked: true },
+  { label: "文字列", name: "string", checked: false },
+];
 
 const RegexGenerator = () => {
   const [strType, setStrType] = useState("");
@@ -40,6 +47,7 @@ const RegexGenerator = () => {
   const strInput = useInput("poipoi");
   const lengthInput = useInput("");
   const convertedInput = useInput("");
+  const ruleCheckList = useCheckBoxList(checkList);
 
   const handleConvert = (strType = "") => {
     setStrType(strType);
@@ -57,11 +65,32 @@ const RegexGenerator = () => {
   }, [strType, lengthInput.value]);
 
   useEffect(() => {
-    if(convertedInput.value) {
-      const sampleStr = strInput.value;
-      const regexp = new RegExp(convertedInput.value, "g");
-      const matched = sampleStr.match(regexp) || [];
-      setMatched(matched);
+    const checkedList = ruleCheckList.items.filter(el => el.checked);
+    const str = checkedList.map(el => {
+      if (el.name === "integer") {
+        return "[0-9]";
+      } else if (el.name === "english") {
+        return "[a-z]";
+      } else if (el.name === "string") {
+        return "\\w";
+      }
+    }).join("|");
+
+    const result = checkedList.length > 1 ? `(${str})` : str;
+    setStrType(result);
+
+  }, [ruleCheckList.items]);
+
+  useEffect(() => {
+    try {
+      if(convertedInput.value) {
+        const sampleStr = strInput.value;
+        const regexp = new RegExp(convertedInput.value, "g");
+        const matched = sampleStr.match(regexp) || [];
+        setMatched(matched);
+      }
+    } catch (err) {
+      return;      
     }
   }, [convertedInput.value, strInput.value]);
 
@@ -75,9 +104,7 @@ const RegexGenerator = () => {
             <div>
               <Input {...lengthInput} /> <span>桁</span>
             </div>
-            <Button text="数字" onClick={() => handleConvert("[0-9]")}/>
-            <Button text="英語" onClick={() => handleConvert("[a-z]")}/>
-            <Button text="文字列" onClick={() => handleConvert("\\w")}/>
+            <CheckBoxList {...ruleCheckList} />
           </div>
           <div>
             <Title text="Buffer" />
